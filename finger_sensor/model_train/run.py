@@ -54,13 +54,13 @@ d_input = len(train_dataset[0]['sensor'])  # Number of time series dimension
 print(f'Train data size: [{DATA_LEN, d_input, d_channel}]')
 print(f'Number of classes: {d_output}')
 
-# Creating a Transformer Model
-# net = Transformer(d_model=d_model, d_input=d_input, d_channel=d_channel,
-#                   d_output=d_output, d_hidden=d_hidden,
-#                   q=q, v=v, h=h, N=N, dropout=dropout).to(DEVICE)
+# Creating a Dual_Transformer Model
+net = Transformer(d_model=d_model, d_input=d_input, d_channel=d_channel,
+                  d_output=d_output, d_hidden=d_hidden,
+                  q=q, v=v, h=h, N=N, dropout=dropout).to(DEVICE)
 
 # Loading existing models
-net = torch.load(save_model_path)
+# net = torch.load(save_model_path)
 
 # Create a loss function. Cross entropy loss is used here.
 loss_function = loss()
