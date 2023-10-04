@@ -18,12 +18,12 @@ class Transformer(Module):
                                                   h=h,
                                                   dropout=dropout) for _ in range(N)])
 
-        self.encoder_list2 = ModuleList([Encoder(d_model=d_model,
-                                                  d_hidden=d_hidden,
-                                                  q=q,
-                                                  v=v,
-                                                  h=h,
-                                                  dropout=dropout) for _ in range(N)])
+        # self.encoder_list2 = ModuleList([Encoder(d_model=d_model,
+        #                                           d_hidden=d_hidden,
+        #                                           q=q,
+        #                                           v=v,
+        #                                           h=h,
+        #                                           dropout=dropout) for _ in range(N)])
 
         self.channel_list = ModuleList([CWforward(d_model=d_model,
                                                   d_hidden=d_hidden,
@@ -31,10 +31,10 @@ class Transformer(Module):
 
         self.embedding_channel = torch.nn.Linear(d_channel, d_model)
         self.embedding_input = torch.nn.Linear(d_input, d_model)
-        self.embedding_input2 = torch.nn.Linear(d_input, d_model)
+        # self.embedding_input2 = torch.nn.Linear(d_input, d_model)
 
-        self.weight = torch.nn.Linear(d_model * d_input + d_model * d_channel + d_model * d_channel, 3)
-        self.output_linear = torch.nn.Linear(d_model * d_input + d_model * d_channel + d_model * d_channel, d_output)
+        self.weight = torch.nn.Linear(d_model * d_input + d_model * d_channel, 2)
+        self.output_linear = torch.nn.Linear(d_model * d_input + d_model * d_channel, d_output)
 
         self.d_input = d_input
         self.d_model = d_model
@@ -59,20 +59,20 @@ class Transformer(Module):
             encoding, score_channel = encoder(encoding)
 
 
-        encoding2= self.embedding_input2(x)
-        input_to_gather2 = encoding2
-        for encoder in self.encoder_list2:
-            encoding2, score_channel2 = encoder(encoding2)
+        # encoding2= self.embedding_input2(x)
+        # input_to_gather2 = encoding2
+        # for encoder in self.encoder_list2:
+        #     encoding2, score_channel2 = encoder(encoding2)
 
 
         # 3 dim to 2 dim
         channelcoding = channelcoding.reshape(channelcoding.shape[0], -1)
         encoding = encoding.reshape(encoding.shape[0], -1)
-        encoding2 = encoding2.reshape(encoding2.shape[0], -1)
+        # encoding2 = encoding2.reshape(encoding2.shape[0], -1)
 
         # get weight
-        weight = F.softmax(self.weight(torch.cat([channelcoding, encoding, encoding2], dim=-1)), dim=-1)
-        encoding_all = torch.cat([channelcoding * weight[:, 0:1], encoding * weight[:, 1:2], encoding2 * weight[:, 2:3]], dim=-1)
+        weight = F.softmax(self.weight(torch.cat([channelcoding, encoding], dim=-1)), dim=-1)
+        encoding_all = torch.cat([channelcoding * weight[:, 0:1], encoding * weight[:, 1:2]], dim=-1)
 
         # out
         output = self.output_linear(encoding_all)
